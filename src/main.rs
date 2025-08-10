@@ -2,6 +2,7 @@ use reqwest;
 use serde_json::{Value, json};
 use serde::{Deserialize, Serialize};
 use clap::Parser;
+use rust_decimal::prelude::*;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -58,9 +59,12 @@ struct StationData {
 
 fn c_to_f(c: &f64) -> f64 {
     let s: f64 = *c as f64;
-    let f = s * 1.8 + 32.0;
+    let r = Decimal::from_f64(s * 1.8 + 32.0)
+        .unwrap()
+        .to_f64()
+        .unwrap();
 
-    f
+    r
 }
 
 
