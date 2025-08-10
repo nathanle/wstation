@@ -9,6 +9,9 @@ struct Args {
     /// Tempest API Token 
     #[arg(short, long)]
     token: String,
+    /// Station ID 
+    #[arg(short, long)]
+    station: String,
 }
 
 #[derive(serde::Deserialize, Serialize, Debug)]
@@ -56,7 +59,7 @@ struct StationData {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let url = format!("https://swd.weatherflow.com/swd/rest/observations/station/144129?token={0}", args.token);
+    let url = format!("https://swd.weatherflow.com/swd/rest/observations/station/{}?token={}", args.station, args.token);
 
     let response = reqwest::get(url).await?;
 
