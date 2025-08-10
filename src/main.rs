@@ -56,6 +56,14 @@ struct StationData {
     wind_lull: f64
 }
 
+fn c_to_f(c: &f64) -> f64 {
+    let s: f64 = *c as f64;
+    let f = s * 1.8 + 32.0;
+
+    f
+}
+
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
@@ -66,7 +74,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if response.status().is_success() {
         let json: serde_json::Value = response.json().await?;
         let data: StationData = serde_json::from_value(json["obs"][0].clone()).unwrap();
-        println!("{}", serde_json::to_string_pretty(&data).unwrap());
+        let feels_like_f = c_to_f(&data.feels_like);
+        let air_temp_f = c_to_f(&data.air_temperature);
+        let heat_index_f = c_to_f(&data.heat_index);
+        let data2 = StationData {
+            feels_like: feels_like_f,
+            heat_index: heat_index_f,
+            air_temperature: air_temp_f,
+            ..data
+        };
+        println!("{}", serde_json::to_string_pretty(&data2).unwrap());
     } else {
         eprintln!("Request failed with status: {}", response.status());
     }
