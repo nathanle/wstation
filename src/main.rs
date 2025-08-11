@@ -1,8 +1,9 @@
 use reqwest;
-use serde_json::{Value, json};
-use serde::{Deserialize, Serialize};
+use serde_json;
+use serde::{Serialize};
 use clap::Parser;
 use rust_decimal::prelude::*;
+use chrono::{NaiveDateTime, DateTime, Utc, Local, TimeZone};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -46,7 +47,7 @@ struct StationData {
     sea_level_pressure: f64,
     solar_radiation: u64,
     station_pressure: f64,
-    timestamp: u64,
+    timestamp: i64,
     uv: f64,
     wet_bulb_globe_temperature: f64,
     wet_bulb_temperature: f64,
@@ -61,12 +62,22 @@ fn c_to_f(c: &f64) -> f64 {
     let s: f64 = *c as f64;
     let r = Decimal::from_f64(s * 1.8 + 32.0)
         .unwrap()
+        .round_dp(2)
         .to_f64()
         .unwrap();
 
     r
 }
 
+fn epoch_to_dt(e: &String) -> String {
+    //let epoch: i64 = e.clone();
+    let timestamp = e.parse::<i64>().unwrap();
+    let naive = NaiveDateTime::from_timestamp(timestamp, 0);
+    let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
+    let newdate = datetime.format("%Y-%m-%d %H:%M:%S");
+
+    newdate.to_string()
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -85,6 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             feels_like: feels_like_f,
             heat_index: heat_index_f,
             air_temperature: air_temp_f,
+            //timestamp: epoch_to_dt(&data.timestamp),
             ..data
         };
         println!("{}", serde_json::to_string_pretty(&data2).unwrap());
