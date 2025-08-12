@@ -69,6 +69,15 @@ fn c_to_f(c: &f64) -> f64 {
     r
 }
 
+fn round(c: &f64) -> f64 {
+    let r = Decimal::from_f64(*c as f64)
+        .unwrap()
+        .round_dp(2)
+        .to_f64()
+        .unwrap();
+
+    r
+}
 fn epoch_to_dt(e: &String) -> String {
     //let epoch: i64 = e.clone();
     let timestamp = e.parse::<i64>().unwrap();
@@ -92,10 +101,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let feels_like_f = c_to_f(&data.feels_like);
         let air_temp_f = c_to_f(&data.air_temperature);
         let heat_index_f = c_to_f(&data.heat_index);
+        let precip = round(&data.precip);
+        let precip_accum_last_1hr = round(&data.precip_accum_last_1hr);
         let data2 = StationData {
             feels_like: feels_like_f,
             heat_index: heat_index_f,
             air_temperature: air_temp_f,
+            precip: precip,
+            precip_accum_last_1hr: precip_accum_last_1hr,
             //timestamp: epoch_to_dt(&data.timestamp),
             ..data
         };
